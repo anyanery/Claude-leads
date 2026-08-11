@@ -28,3 +28,18 @@ npm run test:connection
 ```
 
 This calls the Apify API and prints the authenticated username, confirming the token works.
+
+### Search LinkedIn leads
+
+Runs the [`harvestapi/linkedin-profile-search`](https://console.apify.com/actors) actor and saves results to `output/` (git-ignored — these are real people's data and must never be committed, especially in a public repo).
+
+```bash
+npm run leads:linkedin -- --query "Marketing Manager" --location "Brazil" --max 20
+```
+
+Options:
+- `--query` (required) — job title / fuzzy search text
+- `--location` — repeatable, e.g. `--location "Brazil" --location "Portugal"`
+- `--max` — max profiles to scrape (default 20)
+
+Each run writes a timestamped `.json` (raw actor output) and `.csv` (flattened: name, headline, location, current company, profile URL, email) into `output/`. The CSV column mapping is a best guess at the actor's field names — check the raw JSON if columns come out empty and let us know so the mapping can be fixed.

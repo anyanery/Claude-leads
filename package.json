@@ -5,7 +5,8 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "test:connection": "node src/testConnection.js"
+    "test:connection": "node src/testConnection.js",
+    "leads:linkedin": "node src/searchLinkedinLeads.js"
   },
   "dependencies": {
     "apify-client": "^2.9.5",
