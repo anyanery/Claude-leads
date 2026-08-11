@@ -1,0 +1,14 @@
+{
+  "name": "claude-leads",
+  "version": "1.0.0",
+  "description": "Lead generation utilities powered by Apify actors",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test:connection": "node src/testConnection.js"
+  },
+  "dependencies": {
+    "apify-client": "^2.9.5",
+    "dotenv": "^16.4.5"
+  }
+}
