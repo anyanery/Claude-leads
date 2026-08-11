@@ -54,15 +54,18 @@ function csvEscape(value) {
 }
 
 const rows = items.map((item) => ({
-  name: item.name ?? item.fullName ?? '',
-  headline: item.headline ?? item.currentPosition?.title ?? '',
-  location: item.location ?? item.locationName ?? '',
-  currentCompany: item.currentPosition?.companyName ?? item.currentCompany ?? '',
-  profileUrl: item.linkedinUrl ?? item.profileUrl ?? item.url ?? '',
-  email: item.email ?? '',
+  name: [item.firstName, item.lastName].filter(Boolean).join(' '),
+  headline: item.headline ?? '',
+  currentTitle: item.currentPosition?.[0]?.position ?? '',
+  currentCompany: item.currentPosition?.[0]?.companyName ?? '',
+  location: item.location?.linkedinText ?? item.location?.parsed?.text ?? '',
+  profileUrl: item.linkedinUrl ?? '',
+  email: item.emails?.[0] ?? '',
 }));
 
-const header = Object.keys(rows[0] ?? { name: '', headline: '', location: '', currentCompany: '', profileUrl: '', email: '' });
+const header = Object.keys(
+  rows[0] ?? { name: '', headline: '', currentTitle: '', currentCompany: '', location: '', profileUrl: '', email: '' }
+);
 const csv = [header.join(','), ...rows.map((row) => header.map((key) => csvEscape(row[key])).join(','))].join('\n');
 
 const csvPath = new URL(`linkedin-leads-${stamp}.csv`, outDir);
