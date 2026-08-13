@@ -41,6 +41,7 @@ Options:
 - `--query` (required, repeatable) — one job title / fuzzy search text per flag; each is run as a separate search against the actor
 - `--location` — repeatable, e.g. `--location "Brazil" --location "Portugal"`
 - `--max` — max profiles to scrape per query (default 20)
+- `--delay` — seconds to wait between queries (default 25). Running many searches back-to-back with no delay tends to get rate-limited by LinkedIn partway through the batch — later queries silently return 0 results even though the run doesn't error. If you see a batch where results just stop coming in after a few queries, that's why; re-run the affected queries alone (or with a longer `--delay`).
 
 Each query gets its own raw `output/raw-<timestamp>-<query>.json` (full actor output, useful if the CSV mapping ever needs fixing). All queries are then merged into a single `output/leads-<timestamp>.csv`, de-duplicated by LinkedIn profile URL — a person matched by two different queries appears once, with both listed in the `matchedQueries` column.
 

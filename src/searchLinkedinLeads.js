@@ -4,17 +4,22 @@ import { apifyClient } from './apifyClient.js';
 const ACTOR_ID = 'harvestapi/linkedin-profile-search';
 
 function parseArgs(argv) {
-  const args = { queries: [], locations: [], maxItems: 20 };
+  const args = { queries: [], locations: [], maxItems: 20, delaySeconds: 25 };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--query' || arg === '-q') args.queries.push(argv[++i]);
     else if (arg === '--location' || arg === '-l') args.locations.push(argv[++i]);
     else if (arg === '--max') args.maxItems = Number(argv[++i]);
+    else if (arg === '--delay') args.delaySeconds = Number(argv[++i]);
   }
   return args;
 }
 
-const { queries, locations, maxItems } = parseArgs(process.argv.slice(2));
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+const { queries, locations, maxItems, delaySeconds } = parseArgs(process.argv.slice(2));
 
 if (queries.length === 0) {
   console.error(
@@ -40,7 +45,14 @@ const stamp = new Date().toISOString().replace(/[:.]/g, '-');
 // job titles only appears once, with both titles recorded.
 const seen = new Map();
 
-for (const searchQuery of queries) {
+for (let i = 0; i < queries.length; i++) {
+  const searchQuery = queries[i];
+
+  if (i > 0) {
+    console.log(`\nWaiting ${delaySeconds}s before next search (avoids getting rate-limited)...`);
+    await sleep(delaySeconds * 1000);
+  }
+
   const input = {
     searchQuery,
     locations,
@@ -51,10 +63,13 @@ for (const searchQuery of queries) {
     recentlyPostedOnLinkedIn: false,
   };
 
-  console.log(`\nRunning "${searchQuery}"...`);
+  console.log(`Running "${searchQuery}"...`);
   const run = await apifyClient.actor(ACTOR_ID).call(input);
   const { items } = await apifyClient.dataset(run.defaultDatasetId).listItems();
   console.log(`  -> ${items.length} profiles`);
+  if (items.length === 0) {
+    console.warn(`  WARNING: 0 results for "${searchQuery}" — may be rate-limited, worth re-running alone later.`);
+  }
 
   const safeName = searchQuery.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
   const rawPath = new URL(`raw-${stamp}-${safeName}.json`, outDir);
